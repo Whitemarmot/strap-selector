@@ -11,48 +11,57 @@ const STRAPS = [
   {
     name: "Black NATO",
     type: "nato",
-    image: "assets/straps/nato/black-nato.png"
+    image: "assets/straps/nato/black-nato.png",
+    preview: "assets/previews/complete-nato-black.png"
   },
   {
     name: "Brown NATO",
     type: "nato",
-    image: "assets/straps/nato/brown-nato.png"
+    image: "assets/straps/nato/brown-nato.png",
+    preview: "assets/previews/complete-nato-brown.png"
   },
   {
     name: "Green NATO",
     type: "nato",
-    image: "assets/straps/nato/green-nato.png"
+    image: "assets/straps/nato/green-nato.png",
+    preview: "assets/previews/complete-nato-green.png"
   },
   {
     name: "Black Leather",
     type: "common",
     top: "assets/straps/common/black-leather-top.png",
-    bottom: "assets/straps/common/black-leather-bottom.png"
+    bottom: "assets/straps/common/black-leather-bottom.png",
+    preview: "assets/previews/complete-black-leather.png"
   },
   {
     name: "Leather Cream",
     type: "common",
     top: "assets/straps/common/leather-cream-top.png",
-    bottom: "assets/straps/common/leather-cream-bottom.png"
+    bottom: "assets/straps/common/leather-cream-bottom.png",
+    preview: "assets/previews/complete-leather-cream.png"
   },
   {
     name: "Milano",
     type: "common",
     top: "assets/straps/common/milano-top.png",
-    bottom: "assets/straps/common/milano-bottom.png"
+    bottom: "assets/straps/common/milano-bottom.png",
+    preview: "assets/previews/complete-milano.png"
   },
   {
     name: "Steel",
     type: "steel",
     top: "assets/straps/steel/steel-top.png",
-    bottom: "assets/straps/steel/steel-bottom.png"
+    bottom: "assets/straps/steel/steel-bottom.png",
+    preview: "assets/previews/complete-steel.png"
   }
 ];
 
-function getWatchParam() {
+function getParams() {
   const params = new URLSearchParams(window.location.search);
-  const watch = params.get("watch") || "montre1";
-  return watch.toLowerCase();
+  return {
+    watch: (params.get("watch") || "montre1").toLowerCase(),
+    previewMode: params.get("preview") === "true"
+  };
 }
 
 function preloadImages(watchName) {
@@ -64,6 +73,7 @@ function preloadImages(watchName) {
       srcs.push(s.top);
       srcs.push(s.bottom);
     }
+    if (s.preview) srcs.push(s.preview);
   });
   srcs.forEach((src) => {
     const img = new Image();
@@ -71,7 +81,7 @@ function preloadImages(watchName) {
   });
 }
 
-function createNatoSlide(strap) {
+function createNatoAssembly(strap) {
   const assembly = document.createElement("div");
   assembly.className = "assembly assembly--nato";
 
@@ -84,14 +94,13 @@ function createNatoSlide(strap) {
   return assembly;
 }
 
-function createSplitSlide(strap, watchHeight) {
+function createSplitAssembly(strap, watchHeight) {
   const { overlap, offsetY } = STRAP_TYPES[strap.type];
   const overlapPx = watchHeight * overlap;
   const offsetPx = watchHeight * offsetY;
 
   const assembly = document.createElement("div");
   assembly.className = "assembly assembly--split";
-  // Shift both strap parts together vertically
   if (offsetPx !== 0) {
     assembly.style.transform = `translateY(${offsetPx}px)`;
   }
@@ -117,8 +126,20 @@ function createSplitSlide(strap, watchHeight) {
   return assembly;
 }
 
+function createPreview(strap) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "slide__preview";
+
+  const img = document.createElement("img");
+  img.src = strap.preview;
+  img.alt = strap.name;
+
+  wrapper.appendChild(img);
+  return wrapper;
+}
+
 function init() {
-  const watchName = getWatchParam();
+  const { watch: watchName, previewMode } = getParams();
   const watchSrc = `assets/watches/${watchName}.png`;
   preloadImages(watchName);
 
@@ -147,14 +168,25 @@ function init() {
       const slide = document.createElement("div");
       slide.className = "carousel__slide";
 
+      // Assembly (shown when active / under the watch)
+      const assemblyWrapper = document.createElement("div");
+      assemblyWrapper.className = "slide__assembly";
+
       let assembly;
       if (strap.type === "nato") {
-        assembly = createNatoSlide(strap);
+        assembly = createNatoAssembly(strap);
       } else {
-        assembly = createSplitSlide(strap, watchHeight);
+        assembly = createSplitAssembly(strap, watchHeight);
+      }
+      assemblyWrapper.appendChild(assembly);
+      slide.appendChild(assemblyWrapper);
+
+      // Preview (shown when not active, only in preview mode)
+      if (previewMode && strap.preview) {
+        slide.appendChild(createPreview(strap));
+        slide.classList.add("carousel__slide--has-preview");
       }
 
-      slide.appendChild(assembly);
       track.appendChild(slide);
     });
 

@@ -31,7 +31,7 @@ body {
   position: relative;
   background: #f5f5f5;
   border-radius: 4px;
-  height: 520px;
+  height: 359px;
   overflow: hidden;
 }
 
@@ -66,13 +66,49 @@ body {
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  opacity: 0.4;
+  opacity: 0.5;
   transition: opacity 0.4s ease;
   cursor: pointer;
+  position: relative;
 }
 
 .carousel__slide--active {
   opacity: 1;
+}
+
+/* Preview / Assembly toggle */
+.slide__assembly,
+.slide__preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Slides with preview: show preview by default, assembly when active */
+.carousel__slide--has-preview .slide__assembly {
+  display: none;
+}
+
+.carousel__slide--has-preview .slide__preview {
+  display: flex;
+}
+
+.carousel__slide--has-preview.carousel__slide--active .slide__assembly {
+  display: flex;
+}
+
+.carousel__slide--has-preview.carousel__slide--active .slide__preview {
+  display: none;
+}
+
+/* Preview image styling */
+.slide__preview img {
+  max-height: 90%;
+  max-width: 280px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 /* Navigation arrows */
