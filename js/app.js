@@ -140,8 +140,7 @@ function createPreview(strap) {
 
 function scaleToFit() {
   const selector = document.querySelector(".strap-selector");
-  const scale = window.innerWidth / 1200;
-  selector.style.transform = `scale(${scale})`;
+  selector.style.zoom = window.innerWidth / 1200;
 }
 
 function init() {
