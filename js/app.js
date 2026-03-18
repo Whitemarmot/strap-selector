@@ -1,59 +1,68 @@
+// Strap types: nato (single image), common (split, 5% overlap), steel (split, 8% overlap)
+// overlap: how much TOP/BOTTOM overlap the watch area (% of watch height)
+// offsetY: vertical shift of both strap parts (% of watch height, positive = down, negative = up)
+const STRAP_TYPES = {
+  nato: { overlap: 0, offsetY: 0 },
+  common: { overlap: 0.06, offsetY: -0.005 },
+  steel: { overlap: 0.18, offsetY: 0 }
+};
+
 const STRAPS = [
   {
     name: "Black NATO",
     type: "nato",
-    image: "Black NATO.png"
+    image: "assets/straps/nato/black-nato.png"
   },
   {
     name: "Brown NATO",
     type: "nato",
-    image: "Brown NATO.png"
+    image: "assets/straps/nato/brown-nato.png"
   },
   {
     name: "Green NATO",
     type: "nato",
-    image: "Green NATO.png"
+    image: "assets/straps/nato/green-nato.png"
   },
   {
     name: "Black Leather",
-    type: "split",
-    top: "Black Leather TOP.png",
-    bottom: "Black Leather BOTTOM.png"
+    type: "common",
+    top: "assets/straps/common/black-leather-top.png",
+    bottom: "assets/straps/common/black-leather-bottom.png"
   },
   {
     name: "Leather Cream",
-    type: "split",
-    top: "Leather Cream TOP.png",
-    bottom: "Leather Cream BOTTOM.png"
+    type: "common",
+    top: "assets/straps/common/leather-cream-top.png",
+    bottom: "assets/straps/common/leather-cream-bottom.png"
   },
   {
     name: "Milano",
-    type: "split",
-    top: "Milano TOP.png",
-    bottom: "Milano BOTTOM.png"
+    type: "common",
+    top: "assets/straps/common/milano-top.png",
+    bottom: "assets/straps/common/milano-bottom.png"
   },
   {
     name: "Steel",
-    type: "split",
-    top: "Steel TOP.png",
-    bottom: "Steel BOTTOM.png"
+    type: "steel",
+    top: "assets/straps/steel/steel-top.png",
+    bottom: "assets/straps/steel/steel-bottom.png"
   }
 ];
 
 function getWatchParam() {
   const params = new URLSearchParams(window.location.search);
   const watch = params.get("watch") || "montre1";
-  return watch.charAt(0).toUpperCase() + watch.slice(1);
+  return watch.toLowerCase();
 }
 
 function preloadImages(watchName) {
-  const srcs = [`assets/${watchName}.png`];
+  const srcs = [`assets/watches/${watchName}.png`];
   STRAPS.forEach((s) => {
     if (s.type === "nato") {
-      srcs.push(`assets/${s.image}`);
+      srcs.push(s.image);
     } else {
-      srcs.push(`assets/${s.top}`);
-      srcs.push(`assets/${s.bottom}`);
+      srcs.push(s.top);
+      srcs.push(s.bottom);
     }
   });
   srcs.forEach((src) => {
@@ -68,29 +77,39 @@ function createNatoSlide(strap) {
 
   const strapImg = document.createElement("img");
   strapImg.className = "assembly__strap";
-  strapImg.src = `assets/${strap.image}`;
+  strapImg.src = strap.image;
   strapImg.alt = strap.name;
 
   assembly.appendChild(strapImg);
   return assembly;
 }
 
-function createSplitSlide(strap) {
+function createSplitSlide(strap, watchHeight) {
+  const { overlap, offsetY } = STRAP_TYPES[strap.type];
+  const overlapPx = watchHeight * overlap;
+  const offsetPx = watchHeight * offsetY;
+
   const assembly = document.createElement("div");
   assembly.className = "assembly assembly--split";
+  // Shift both strap parts together vertically
+  if (offsetPx !== 0) {
+    assembly.style.transform = `translateY(${offsetPx}px)`;
+  }
 
   const topImg = document.createElement("img");
   topImg.className = "assembly__top";
-  topImg.src = `assets/${strap.top}`;
+  topImg.src = strap.top;
   topImg.alt = `${strap.name} top`;
+  topImg.style.marginBottom = `-${overlapPx}px`;
 
   const spacer = document.createElement("div");
   spacer.className = "assembly__spacer";
 
   const bottomImg = document.createElement("img");
   bottomImg.className = "assembly__bottom";
-  bottomImg.src = `assets/${strap.bottom}`;
+  bottomImg.src = strap.bottom;
   bottomImg.alt = `${strap.name} bottom`;
+  bottomImg.style.marginTop = `-${overlapPx}px`;
 
   assembly.appendChild(topImg);
   assembly.appendChild(spacer);
@@ -100,7 +119,7 @@ function createSplitSlide(strap) {
 
 function init() {
   const watchName = getWatchParam();
-  const watchSrc = `assets/${watchName}.png`;
+  const watchSrc = `assets/watches/${watchName}.png`;
   preloadImages(watchName);
 
   const carousel = document.querySelector(".carousel");
@@ -117,15 +136,13 @@ function init() {
   carousel.appendChild(watchImg);
 
   // Wait for watch image to load, then measure its height
-  // and use it to size the spacer in split straps
   watchImg.addEventListener("load", () => {
     const watchHeight = watchImg.offsetHeight;
     carousel.style.setProperty("--watch-height", watchHeight + "px");
-    buildCarousel();
+    buildCarousel(watchHeight);
   });
 
-  function buildCarousel() {
-    // Build slides (straps only, no watch)
+  function buildCarousel(watchHeight) {
     STRAPS.forEach((strap) => {
       const slide = document.createElement("div");
       slide.className = "carousel__slide";
@@ -134,7 +151,7 @@ function init() {
       if (strap.type === "nato") {
         assembly = createNatoSlide(strap);
       } else {
-        assembly = createSplitSlide(strap);
+        assembly = createSplitSlide(strap, watchHeight);
       }
 
       slide.appendChild(assembly);
@@ -145,7 +162,6 @@ function init() {
     const slides = track.querySelectorAll(".carousel__slide");
 
     function update() {
-      // Center the active slide: slide 1 = 0%, slide 0 = +33.333%, slide 2 = -33.333%
       const offset = (1 - currentIndex) * 33.333;
       track.style.transform = `translateX(${offset}%)`;
 
@@ -153,7 +169,6 @@ function init() {
         s.classList.toggle("carousel__slide--active", i === currentIndex);
       });
 
-      // Disable arrows at boundaries
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex === STRAPS.length - 1;
 
