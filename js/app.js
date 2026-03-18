@@ -138,7 +138,16 @@ function createPreview(strap) {
   return wrapper;
 }
 
+function scaleToFit() {
+  const selector = document.querySelector(".strap-selector");
+  const scale = window.innerWidth / 1200;
+  selector.style.transform = `scale(${scale})`;
+}
+
 function init() {
+  scaleToFit();
+  window.addEventListener("resize", scaleToFit);
+
   const { watch: watchName, previewMode } = getParams();
   const watchSrc = `assets/watches/${watchName}.png`;
   preloadImages(watchName);

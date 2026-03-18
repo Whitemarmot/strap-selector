@@ -8,12 +8,14 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #fff;
   color: #222;
+  overflow-x: hidden;
 }
 
 .strap-selector {
-  max-width: 1200px;
-  margin: 40px auto;
+  width: 1200px;
+  margin: 0 auto;
   padding: 0 20px;
+  transform-origin: top center;
 }
 
 .strap-selector__title {
