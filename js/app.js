@@ -145,24 +145,33 @@ function init() {
     const slides = track.querySelectorAll(".carousel__slide");
 
     function update() {
-      const offset = (currentIndex - 1) * 33.333;
-      track.style.transform = `translateX(-${offset}%)`;
+      // Center the active slide: slide 1 = 0%, slide 0 = +33.333%, slide 2 = -33.333%
+      const offset = (1 - currentIndex) * 33.333;
+      track.style.transform = `translateX(${offset}%)`;
 
       slides.forEach((s, i) => {
         s.classList.toggle("carousel__slide--active", i === currentIndex);
       });
 
+      // Disable arrows at boundaries
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === STRAPS.length - 1;
+
       nameDisplay.textContent = STRAPS[currentIndex].name;
     }
 
     prevBtn.addEventListener("click", () => {
-      currentIndex = (currentIndex - 1 + STRAPS.length) % STRAPS.length;
-      update();
+      if (currentIndex > 0) {
+        currentIndex--;
+        update();
+      }
     });
 
     nextBtn.addEventListener("click", () => {
-      currentIndex = (currentIndex + 1) % STRAPS.length;
-      update();
+      if (currentIndex < STRAPS.length - 1) {
+        currentIndex++;
+        update();
+      }
     });
 
     slides.forEach((slide, i) => {

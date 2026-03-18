@@ -41,7 +41,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 200px;
+  width: 300px;
   height: auto;
   z-index: 5;
   pointer-events: none;
@@ -95,8 +95,13 @@ body {
   transition: background 0.2s;
 }
 
-.carousel__arrow:hover {
+.carousel__arrow:hover:not(:disabled) {
   background: #fff;
+}
+
+.carousel__arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
 .carousel__arrow--prev {
@@ -123,14 +128,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 260px;
+  width: 320px;
   height: 100%;
   justify-content: center;
+  overflow: visible;
 }
 
 /* NATO: single strap image centered */
 .assembly--nato .assembly__strap {
-  width: 200px;
+  width: 300px;
   height: auto;
   display: block;
 }
@@ -142,18 +148,18 @@ body {
 }
 
 .assembly--split .assembly__top {
-  width: 200px;
+  width: 300px;
   height: auto;
   display: block;
 }
 
 .assembly--split .assembly__spacer {
-  height: var(--watch-height, 160px);
+  height: var(--watch-height, 240px);
   flex-shrink: 0;
 }
 
 .assembly--split .assembly__bottom {
-  width: 200px;
+  width: 300px;
   height: auto;
   display: block;
 }
